@@ -6,8 +6,10 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 
@@ -22,9 +24,9 @@ type calc struct {
 	window  fyne.Window
 }
 
-func (c *calc) display(newtext string) {
-	c.equation = newtext
-	c.output.SetText(newtext)
+func (c *calc) display(newText string) {
+	c.equation = newText
+	c.output.SetText(newText)
 }
 
 func (c *calc) character(char rune) {
@@ -124,15 +126,29 @@ func (c *calc) onPasteShortcut(shortcut fyne.Shortcut) {
 	}
 
 	c.display(c.equation + content)
+	c.msgBubble("paste from clipboard")
 }
 
 func (c *calc) onCopyShortcut(shortcut fyne.Shortcut) {
 	shortcut.(*fyne.ShortcutCopy).Clipboard.SetContent(c.equation)
+	c.msgBubble("copy to clipboard")
+}
+
+func (c *calc) msgBubble(text string) {
+	tipText := canvas.NewText(text, nil)
+
+	popUp := widget.NewPopUp(container.NewWithoutLayout(tipText), c.window.Canvas())
+	popUp.ShowAtPosition(fyne.CurrentApp().Driver().AbsolutePositionForObject(c.output))
+
+	time.AfterFunc(1*time.Second, func() {
+		popUp.Hide()
+	})
 }
 
 func (c *calc) loadUI(app fyne.App) {
 	c.output = &widget.Label{Alignment: fyne.TextAlignTrailing}
 	c.output.TextStyle.Monospace = true
+	c.output.TextStyle.Bold = true
 
 	equals := c.addButton("=", c.evaluate)
 	equals.Importance = widget.HighImportance
@@ -172,7 +188,9 @@ func (c *calc) loadUI(app fyne.App) {
 	canvas.SetOnTypedKey(c.onTypedKey)
 	canvas.AddShortcut(&fyne.ShortcutCopy{}, c.onCopyShortcut)
 	canvas.AddShortcut(&fyne.ShortcutPaste{}, c.onPasteShortcut)
-	c.window.Resize(fyne.NewSize(200, 300))
+
+	c.window.Resize(fyne.NewSize(300, 450))
+	c.window.CenterOnScreen()
 	c.window.Show()
 }
 

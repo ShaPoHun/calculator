@@ -18,3 +18,7 @@ fyne-cross/
 # Other stuff
 .idea
 .DS_Store
+
+# app
+testApp
+Calculator.app
