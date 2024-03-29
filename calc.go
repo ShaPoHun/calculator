@@ -149,6 +149,7 @@ func (c *calc) loadUI(app fyne.App) {
 	c.output = &widget.Label{Alignment: fyne.TextAlignTrailing}
 	c.output.TextStyle.Monospace = true
 	c.output.TextStyle.Bold = true
+	c.output.Truncation = fyne.TextTruncateEllipsis
 
 	equals := c.addButton("=", c.evaluate)
 	equals.Importance = widget.HighImportance
