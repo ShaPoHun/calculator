@@ -6,10 +6,11 @@ package main
 import "fyne.io/fyne/v2/app"
 
 func main() {
-	a := app.New()
+	a := app.NewWithID("io.shapohun.calculator")
 	a.SetIcon(resourceIconPng)
 
-	c := newCalculator()
-	c.loadUI(a)
+	c := newCalculator(a)
+	c.loadPreferences()
+	c.loadUI()
 	a.Run()
 }
