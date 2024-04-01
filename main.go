@@ -6,7 +6,7 @@ package main
 import "fyne.io/fyne/v2/app"
 
 func main() {
-	a := app.NewWithID("io.shapohun.calculator")
+	a := app.NewWithID("io.github.shapohun.calculator")
 	a.SetIcon(resourceIconPng)
 
 	c := newCalculator(a)
