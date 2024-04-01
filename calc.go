@@ -50,6 +50,7 @@ func (c *calc) digit(d int) {
 
 func (c *calc) clear() {
 	c.display("")
+	c.showProcess("")
 }
 
 func (c *calc) backspace() {
@@ -105,6 +106,9 @@ func (c *calc) addButton(text string, action func()) *widget.Button {
 func (c *calc) digitButton(number int) *widget.Button {
 	str := strconv.Itoa(number)
 	return c.addButton(str, func() {
+		if c.output.Text == "error" {
+			c.clear()
+		}
 		c.digit(number)
 	})
 }
@@ -159,7 +163,105 @@ func (c *calc) msgBubble(text string) {
 	})
 }
 
-func (c *calc) loadUI(app fyne.App) {
+func (c *calc) menu() *fyne.MainMenu {
+	settingsMenu := fyne.NewMenu("Settings",
+		c.showHistoryMenu(),
+		c.clearHistoryMenu(),
+		c.setPrecisionMenu(),
+	)
+	return fyne.NewMainMenu(settingsMenu)
+}
+
+func (c *calc) showHistoryMenu() *fyne.MenuItem {
+	pref := c.app.Preferences()
+	var historyMenu *fyne.MenuItem
+
+	newHistoryWindow := func() {
+		historyMenu.Checked = true
+		c.isHistoryWindowOpen = true
+		c.historyWindow = c.app.NewWindow("History")
+		c.historyWindow.SetOnClosed(func() {
+			historyMenu.Checked = false
+			c.isHistoryWindowOpen = false
+			pref.SetBool(ShowHistoryPref, false)
+		})
+		scrollContainer := container.NewScroll(c.historyText)
+		scrollContainer.Resize(fyne.NewSize(300, 450))
+		scrollContainer.Position()
+		c.historyWindow.SetContent(scrollContainer)
+		c.historyWindow.Resize(fyne.NewSize(300, 450))
+		c.historyWindow.Show()
+	}
+
+	historyMenu = fyne.NewMenuItem("Show History", func() {
+		if c.isHistoryWindowOpen {
+			c.historyWindow.Close()
+			c.isHistoryWindowOpen = false
+			historyMenu.Checked = false
+			pref.SetBool(ShowHistoryPref, false)
+		} else {
+			pref.SetBool(ShowHistoryPref, true)
+			newHistoryWindow()
+		}
+	})
+
+	if c.isHistoryWindowOpen {
+		fmt.Println("History window already open")
+		newHistoryWindow()
+	}
+	return historyMenu
+}
+
+func (c *calc) clearHistoryMenu() *fyne.MenuItem {
+	return fyne.NewMenuItem("Clear History", func() {
+		c.clearHistory()
+	})
+}
+
+func (c *calc) setPrecisionMenu() *fyne.MenuItem {
+	pref := c.app.Preferences()
+	var options []*fyne.MenuItem
+	for i := 0; i <= 15; i++ {
+		option := fyne.NewMenuItem(strconv.Itoa(i), func() {
+			pref.SetInt(PrecisionPref, i)
+			options[c.precision].Checked = false
+			options[i].Checked = true
+			c.precision = i
+			fmt.Println("Precision set to", c.precision)
+		})
+		if i == c.precision {
+			option.Checked = true
+		}
+		options = append(options, option)
+	}
+	configureSubMenu := fyne.NewMenu("", options...)
+
+	precisionMenu := fyne.NewMenuItem("Precision", nil)
+	precisionMenu.ChildMenu = configureSubMenu
+	return precisionMenu
+}
+
+func (c *calc) writeHistory(line string) {
+	c.historyText.SetText(line + "\n" + c.historyText.Text())
+	c.app.Preferences().SetString(HistoryTextPref, c.historyText.Text())
+}
+
+func (c *calc) clearHistory() {
+	c.historyText.SetText("")
+	c.app.Preferences().SetString(HistoryTextPref, "")
+}
+
+func (c *calc) loadPreferences() {
+	p := c.app.Preferences()
+	c.precision = p.Int(PrecisionPref)
+	c.isHistoryWindowOpen = p.Bool(ShowHistoryPref)
+	text := c.app.Preferences().String(HistoryTextPref)
+	if text != "" {
+		c.historyText.SetText(text)
+	}
+}
+
+func (c *calc) loadUI() {
 	c.output = &widget.Label{
 		Alignment: fyne.TextAlignTrailing,
 		TextStyle: fyne.TextStyle{
@@ -178,10 +280,12 @@ func (c *calc) loadUI(app fyne.App) {
 		Truncation: fyne.TextTruncateEllipsis,
 	}
 
+	c.historyText.ShowLineNumbers = true
+
 	equals := c.addButton("=", c.evaluate)
 	equals.Importance = widget.HighImportance
 
-	c.window = app.NewWindow("Calc")
+	c.window = c.app.NewWindow("Calc")
 	c.window.SetContent(container.NewGridWithColumns(1,
 		container.NewGridWithColumns(1,
 			c.process, c.output),
@@ -218,13 +322,17 @@ func (c *calc) loadUI(app fyne.App) {
 	canvas.AddShortcut(&fyne.ShortcutCopy{}, c.onCopyShortcut)
 	canvas.AddShortcut(&fyne.ShortcutPaste{}, c.onPasteShortcut)
 
+	c.window.SetMaster()
 	c.window.Resize(fyne.NewSize(300, 450))
 	c.window.CenterOnScreen()
+	c.window.SetMainMenu(c.menu())
 	c.window.Show()
 }
 
-func newCalculator() *calc {
+func newCalculator(app fyne.App) *calc {
 	return &calc{
-		buttons: make(map[string]*widget.Button, 19),
+		app:         app,
+		historyText: widget.NewTextGrid(),
+		buttons:     make(map[string]*widget.Button, 19),
 	}
 }
