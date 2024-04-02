@@ -17,7 +17,3 @@ help:
 	@echo "  mac   - Build the application for macOS"
 	@echo "  windows - Build the application for Windows"
 	@echo "  linux - Build the application for Linux"
-	@echo "  test  - Run the test suite"
-
-test:
-	go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...
