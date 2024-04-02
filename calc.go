@@ -20,7 +20,6 @@ type calc struct {
 	equation string
 
 	output  *widget.Label
-	process *widget.Label
 	buttons map[string]*widget.Button
 	window  fyne.Window
 }
@@ -28,10 +27,6 @@ type calc struct {
 func (c *calc) display(newText string) {
 	c.equation = newText
 	c.output.SetText(newText)
-}
-
-func (c *calc) showProcess(newText string) {
-	c.process.SetText(newText)
 }
 
 func (c *calc) character(char rune) {
@@ -84,7 +79,6 @@ func (c *calc) evaluate() {
 		return
 	}
 
-	c.showProcess(c.equation)
 	c.display(strconv.FormatFloat(value, 'f', -1, 64))
 }
 
@@ -152,31 +146,17 @@ func (c *calc) msgBubble(text string) {
 }
 
 func (c *calc) loadUI(app fyne.App) {
-	c.output = &widget.Label{
-		Alignment: fyne.TextAlignTrailing,
-		TextStyle: fyne.TextStyle{
-			Monospace: true,
-			Bold:      true,
-		},
-		Truncation: fyne.TextTruncateEllipsis,
-	}
-
-	c.process = &widget.Label{
-		Alignment: fyne.TextAlignTrailing,
-		TextStyle: fyne.TextStyle{
-			Monospace: true,
-			Bold:      true,
-		},
-		Truncation: fyne.TextTruncateEllipsis,
-	}
+	c.output = &widget.Label{Alignment: fyne.TextAlignTrailing}
+	c.output.TextStyle.Monospace = true
+	c.output.TextStyle.Bold = true
+	c.output.Truncation = fyne.TextTruncateEllipsis
 
 	equals := c.addButton("=", c.evaluate)
 	equals.Importance = widget.HighImportance
 
 	c.window = app.NewWindow("Calc")
 	c.window.SetContent(container.NewGridWithColumns(1,
-		container.NewGridWithColumns(1,
-			c.process, c.output),
+		c.output,
 		container.NewGridWithColumns(4,
 			c.addButton("C", c.clear),
 			c.charButton('('),
