@@ -3,7 +3,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -18,17 +17,12 @@ import (
 )
 
 type calc struct {
-	precision           int
-	equation            string
-	isHistoryWindowOpen bool
+	equation string
 
-	app           fyne.App
-	output        *widget.Label
-	process       *widget.Label
-	historyText   *widget.TextGrid
-	buttons       map[string]*widget.Button
-	window        fyne.Window
-	historyWindow fyne.Window
+	output  *widget.Label
+	process *widget.Label
+	buttons map[string]*widget.Button
+	window  fyne.Window
 }
 
 func (c *calc) display(newText string) {
@@ -90,10 +84,8 @@ func (c *calc) evaluate() {
 		return
 	}
 
-	newText := strconv.FormatFloat(value, 'f', c.precision, 64)
 	c.showProcess(c.equation)
-	c.writeHistory(c.equation + " = " + newText)
-	c.display(newText)
+	c.display(strconv.FormatFloat(value, 'f', -1, 64))
 }
 
 func (c *calc) addButton(text string, action func()) *widget.Button {
