@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -65,13 +66,6 @@ func (c *calc) backspace() {
 
 func (c *calc) evaluate() {
 	if strings.Contains(c.output.Text, "error") {
-		c.display("error")
-		return
-	}
-
-	_, err := strconv.ParseFloat(c.output.Text, 64)
-	if err == nil {
-		log.Println("Invalid equation", c.output.Text)
 		c.display("error")
 		return
 	}
@@ -212,7 +206,7 @@ func (c *calc) showHistoryMenu() *fyne.MenuItem {
 	})
 
 	if c.isHistoryWindowOpen {
-		log.Println("History window already open")
+		fmt.Println("History window already open")
 		newHistoryWindow()
 	}
 	return historyMenu
@@ -233,7 +227,7 @@ func (c *calc) setPrecisionMenu() *fyne.MenuItem {
 			options[c.precision].Checked = false
 			options[i].Checked = true
 			c.precision = i
-			log.Println("Precision set to", c.precision)
+			fmt.Println("Precision set to", c.precision)
 		})
 		if i == c.precision {
 			option.Checked = true

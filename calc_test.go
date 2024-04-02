@@ -10,8 +10,8 @@ import (
 )
 
 func TestAdd(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.Tap(calc.buttons["1"])
 	test.Tap(calc.buttons["+"])
@@ -22,8 +22,8 @@ func TestAdd(t *testing.T) {
 }
 
 func TestSubtract(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.Tap(calc.buttons["2"])
 	test.Tap(calc.buttons["-"])
@@ -34,10 +34,8 @@ func TestSubtract(t *testing.T) {
 }
 
 func TestDivide(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.app.Preferences().SetFloat(PrecisionPref, 1)
-	calc.loadPreferences()
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.Tap(calc.buttons["3"])
 	test.Tap(calc.buttons["/"])
@@ -48,8 +46,8 @@ func TestDivide(t *testing.T) {
 }
 
 func TestMultiply(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.Tap(calc.buttons["5"])
 	test.Tap(calc.buttons["*"])
@@ -60,8 +58,8 @@ func TestMultiply(t *testing.T) {
 }
 
 func TestParenthesis(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.Tap(calc.buttons["2"])
 	test.Tap(calc.buttons["*"])
@@ -76,8 +74,8 @@ func TestParenthesis(t *testing.T) {
 }
 
 func TestDot(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.Tap(calc.buttons["2"])
 	test.Tap(calc.buttons["."])
@@ -92,8 +90,8 @@ func TestDot(t *testing.T) {
 }
 
 func TestClear(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.Tap(calc.buttons["1"])
 	test.Tap(calc.buttons["2"])
@@ -103,8 +101,8 @@ func TestClear(t *testing.T) {
 }
 
 func TestContinueAfterResult(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.Tap(calc.buttons["6"])
 	test.Tap(calc.buttons["+"])
@@ -118,8 +116,8 @@ func TestContinueAfterResult(t *testing.T) {
 }
 
 func TestKeyboard(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.TypeOnCanvas(calc.window.Canvas(), "1+1")
 	assert.Equal(t, "1+1", calc.output.Text)
@@ -132,8 +130,8 @@ func TestKeyboard(t *testing.T) {
 }
 
 func TestKeyboard_Buttons(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.TypeOnCanvas(calc.window.Canvas(), "1+1")
 	calc.onTypedKey(&fyne.KeyEvent{Name: fyne.KeyReturn})
@@ -147,8 +145,8 @@ func TestKeyboard_Buttons(t *testing.T) {
 }
 
 func TestKeyboard_Backspace(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	calc.onTypedKey(&fyne.KeyEvent{Name: fyne.KeyBackspace})
 	assert.Equal(t, "", calc.output.Text)
@@ -165,8 +163,8 @@ func TestKeyboard_Backspace(t *testing.T) {
 }
 
 func TestError(t *testing.T) {
-	calc := newCalculator(test.NewApp())
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(test.NewApp())
 
 	test.TypeOnCanvas(calc.window.Canvas(), "1//1=")
 	assert.Equal(t, "error", calc.output.Text)
@@ -185,8 +183,8 @@ func TestError(t *testing.T) {
 
 func TestShortcuts(t *testing.T) {
 	app := test.NewApp()
-	calc := newCalculator(app)
-	calc.loadUI()
+	calc := newCalculator()
+	calc.loadUI(app)
 	clipboard := app.Driver().AllWindows()[0].Clipboard()
 
 	test.TypeOnCanvas(calc.window.Canvas(), "720 + 80")
