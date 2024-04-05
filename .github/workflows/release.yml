@@ -23,7 +23,7 @@ jobs:
           brew install --cask docker
           open /Applications/Docker.app
           # wait for docker
-          while ! docker system info > /dev/null 2>&1; do sleep 1; done
+          # while ! docker system info > /dev/null 2>&1; do sleep 1; done
 
       - name: Build for Mac
         run: fyne-cross darwin
