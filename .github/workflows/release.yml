@@ -18,6 +18,13 @@ jobs:
       - name: Install fyne-cross
         run: go install github.com/fyne-io/fyne-cross@latest
 
+      - name: Install Docker
+        run: |
+          brew install --cask docker
+          open /Applications/Docker.app
+          # wait for docker
+          while ! docker system info > /dev/null 2>&1; do sleep 1; done
+
       - name: Build for Mac
         run: fyne-cross darwin
 
