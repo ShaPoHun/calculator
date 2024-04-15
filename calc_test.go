@@ -229,7 +229,7 @@ func TestCalculationProcess(t *testing.T) {
 	test.Tap(calc.buttons["3"])
 	test.Tap(calc.buttons["="])
 
-	assert.Equal(t, "9.2*3", calc.process.Text)
+	assert.Equal(t, "9.2*3=", calc.process.Text)
 
 	test.Tap(calc.buttons["C"])
 	assert.Equal(t, "", calc.process.Text)
@@ -243,14 +243,14 @@ func TestHistory(t *testing.T) {
 	test.Tap(calc.buttons["+"])
 	test.Tap(calc.buttons["2"])
 	test.Tap(calc.buttons["="])
-	assert.Contains(t, calc.historyText.Text(), "1+2 = 3")
+	assert.Contains(t, calc.historyText.Text(), "1+2=3")
 
 	test.Tap(calc.buttons["C"])
 	test.Tap(calc.buttons["1"])
 	test.Tap(calc.buttons["*"])
 	test.Tap(calc.buttons["2"])
 	test.Tap(calc.buttons["="])
-	assert.Contains(t, calc.historyText.Text(), "1*2 = 2")
+	assert.Contains(t, calc.historyText.Text(), "1*2=2")
 
 	for _, item := range calc.menu().Items {
 		if item.Label == "Settings" {
@@ -285,4 +285,26 @@ func TestPrecision(t *testing.T) {
 			break
 		}
 	}
+}
+
+func TestNextEquation(t *testing.T) {
+	calc := newCalculator(test.NewApp())
+	calc.loadUI()
+
+	test.Tap(calc.buttons["1"])
+	test.Tap(calc.buttons["+"])
+	test.Tap(calc.buttons["2"])
+	test.Tap(calc.buttons["="])
+	test.Tap(calc.buttons["3"])
+
+	assert.Equal(t, "", calc.process.Text)
+	assert.Equal(t, "3", calc.equation)
+
+	test.Tap(calc.buttons["*"])
+	test.Tap(calc.buttons["4"])
+	test.Tap(calc.buttons["*"])
+	test.Tap(calc.buttons["6"])
+	assert.Equal(t, "3*4*6", calc.equation)
+	test.Tap(calc.buttons["="])
+	assert.Equal(t, "72", calc.output.Text)
 }

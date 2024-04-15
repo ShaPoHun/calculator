@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -98,8 +99,8 @@ func (c *calc) evaluate() {
 	}
 
 	newText := strconv.FormatFloat(value, 'f', c.precision, 64)
-	c.showProcess(c.equation)
-	c.writeHistory(c.equation + " = " + newText)
+	c.showProcess(fmt.Sprintf("%s=", c.equation))
+	c.writeHistory(fmt.Sprintf("%s=%s", c.equation, newText))
 	c.display(newText)
 }
 
@@ -112,7 +113,10 @@ func (c *calc) addButton(text string, action func()) *widget.Button {
 func (c *calc) digitButton(number int) *widget.Button {
 	str := strconv.Itoa(number)
 	return c.addButton(str, func() {
-		if c.output.Text == "error" {
+		// Clear the calculator if the output is "error" or
+		//if the process is not empty and the equation doesn't contain any of the operators: +, -, *, /
+		if c.output.Text == "error" ||
+			(c.process.Text != "" && !strings.ContainsAny(c.equation, "+-*/")) {
 			c.clear()
 		}
 		c.digit(number)
@@ -145,15 +149,29 @@ func (c *calc) onTypedKey(ev *fyne.KeyEvent) {
 
 func (c *calc) onPasteShortcut(shortcut fyne.Shortcut) {
 	content := shortcut.(*fyne.ShortcutPaste).Clipboard.Content()
+	if content == "" {
+		return
+	}
+
 	if _, err := strconv.ParseFloat(content, 64); err != nil {
 		return
 	}
 
-	c.display(c.equation + content)
-	c.msgBubble("paste from clipboard")
+	if !strings.ContainsAny(c.equation, "+-*/") {
+		c.display(content)
+		c.msgBubble("paste from clipboard")
+	}
+
+	if strings.LastIndexAny(c.equation, "+-*/") == len(c.equation)-1 {
+		c.display(c.equation + content)
+		c.msgBubble("paste from clipboard")
+	}
 }
 
 func (c *calc) onCopyShortcut(shortcut fyne.Shortcut) {
+	if c.equation == "" {
+		return
+	}
 	shortcut.(*fyne.ShortcutCopy).Clipboard.SetContent(c.equation)
 	c.msgBubble("copy to clipboard")
 }
